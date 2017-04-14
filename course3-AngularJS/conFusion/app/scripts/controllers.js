@@ -10,17 +10,15 @@ angular.module('confusionApp')
 
             $scope.showMenu = false;
             $scope.message = "Loading ...";
-                        $scope.dishes= [];
-                        menuFactory.getDishes()
-            .then(
-                function(response) {
-                    $scope.dishes = response.data;
-                    $scope.showMenu = true;
-                },
-                function(response) {
-                    $scope.message = "Error: "+response.status + " " + response.statusText;
-                }
-            );
+            menuFactory.getDishes().query(
+            function(response) {
+                $scope.dishes = response;
+                // console.log($scope.dishes);
+                $scope.showMenu = true;
+            },
+            function(response) {
+                $scope.message = "Error: "+response.status + " " + response.statusText;
+            });
 
                         
             $scope.select = function(setTab) {
@@ -85,15 +83,15 @@ angular.module('confusionApp')
             $scope.dish = {};
             $scope.showDish = false;
             $scope.message="Loading ...";
-                        menuFactory.getDish(parseInt($stateParams.id,10))
-            .then(
-                function(response){
-                    $scope.dish = response.data;
-                    $scope.showDish=true;
-                },
-                function(response) {
-                    $scope.message = "Error: "+response.status + " " + response.statusText;
-                }
+            menuFactory.getDishes().get({id:parseInt($stateParams.id,10)})
+            .$promise.then(
+                            function(response){
+                                $scope.dish = response;
+                                $scope.showDish = true;
+                            },
+                            function(response) {
+                                $scope.message = "Error: "+response.status + " " + response.statusText;
+                            }
             );
             
         }])
@@ -117,14 +115,13 @@ angular.module('confusionApp')
 
         // implement the IndexController and About Controller here
         .controller('IndexController', ['$scope', 'menuFactory', 'corporateFactory', function($scope, menuFactory, corporateFactory) {
-            $scope.featured = {};
             $scope.showDish = false;
             $scope.message="Loading ...";
 
-            menuFactory.getDish(0)
-            .then(
+            menuFactory.getDishes().get({id:0})
+            .$promise.then(
                 function(response){
-                    $scope.featured = response.data;
+                    $scope.featured = response;
                     $scope.showDish = true;
                 },
                 function(response) {
