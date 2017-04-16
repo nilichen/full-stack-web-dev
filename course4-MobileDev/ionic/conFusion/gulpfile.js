@@ -1,6 +1,8 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util');
 var bower = require('bower');
+var jshint = require('gulp-jshint');
+var stylish = require('jshint-stylish');
 var concat = require('gulp-concat');
 var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
@@ -10,6 +12,12 @@ var sh = require('shelljs');
 var paths = {
   sass: ['./scss/**/*.scss']
 };
+
+gulp.task('jshint', function() {
+  return gulp.src('./www/js/**/*.js')
+  .pipe(jshint())
+  .pipe(jshint.reporter(stylish));
+});
 
 gulp.task('default', ['sass']);
 
