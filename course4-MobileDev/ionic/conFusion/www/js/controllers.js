@@ -220,7 +220,8 @@ angular.module('conFusion.controllers', [])
     };
 }])
 
-.controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', 'baseURL', function($scope, $stateParams, menuFactory, baseURL) {
+.controller('DishDetailController', ['$scope', '$stateParams', '$timeout', 'menuFactory', 'favoriteFactory', 'baseURL', '$ionicPopover', '$ionicModal',  
+  function($scope, $stateParams, $timeout, menuFactory, favoriteFactory, baseURL, $ionicPopover, $ionicModal) {
     $scope.baseURL = baseURL;
     $scope.dish = {};
     $scope.showDish = false;
@@ -237,26 +238,82 @@ angular.module('conFusion.controllers', [])
                     }
     );
 
-    
-}])
+    // .fromTemplateUrl() method
+    $ionicPopover.fromTemplateUrl('templates/dish-detail-popover.html', {
+      scope: $scope
+    }).then(function(popover) {
+      $scope.popover = popover;
+    });
 
-.controller('DishCommentController', ['$scope', 'menuFactory', function($scope,menuFactory) {
-    
-    $scope.mycomment = {rating:5, comment:"", author:"", date:""};
-    
-    $scope.submitComment = function () {
-        
-        $scope.mycomment.date = new Date().toISOString();
-        console.log($scope.mycomment);
-        
-        $scope.dish.comments.push($scope.mycomment);
-menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
-        
-        $scope.commentForm.$setPristine();
-        
-        $scope.mycomment = {rating:5, comment:"", author:"", date:""};
+
+    $scope.openPopover = function($event) {
+      console.log($scope.popover);
+      $scope.popover.show($event);
     };
+
+    $scope.addFavorite = function (index) {
+        // console.log($scope.dish);
+        console.log("index is " + index);
+        favoriteFactory.addToFavorites(index);
+        $scope.popover.hide();
+    };       
+
+    $scope.mycomment = {};
+
+    // Create the reserve modal that we will use later
+    $ionicModal.fromTemplateUrl('templates/dish-comment.html', {
+      scope: $scope
+    }).then(function(modal) {
+      $scope.commentform = modal;
+    });
+
+    // Triggered in the reserve modal to close it
+    $scope.closeComment = function() {
+      $scope.commentform.hide();
+    };
+
+    // Open the reserve modal
+    $scope.comment = function(index) {
+      $scope.commentform.show();
+    };
+
+    // Perform the reserve action when the user submits the reserve form
+    $scope.doComment = function() {
+      console.log('Submitting Comment', $scope.mycomment);
+
+      // Simulate a reservation delay. Remove this and replace with your reservation
+      // code if using a server system
+      $scope.mycomment.date = new Date().toISOString();
+      $scope.dish.comments.push($scope.mycomment);
+      menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);   
+      $scope.mycomment = {};   
+      $timeout(function() {
+        $scope.closeComment();
+        $scope.popover.hide();
+      }, 1000);
+    };     
+
+
+    
 }])
+ 
+// .controller('DishCommentController', ['$scope', 'menuFactory', function($scope,menuFactory) {
+    
+//     $scope.mycomment = {rating:5, comment:"", author:"", date:""};
+    
+//     $scope.submitComment = function () {
+        
+//         $scope.mycomment.date = new Date().toISOString();
+//         console.log($scope.mycomment);
+        
+//         $scope.dish.comments.push($scope.mycomment);
+// menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
+        
+//         $scope.commentForm.$setPristine();
+        
+//         $scope.mycomment = {rating:5, comment:"", author:"", date:""};
+//     };
+// }])
 
 // implement the IndexController and About Controller here
 .controller('IndexController', ['$scope', 'menuFactory', 'corporateFactory', 'baseURL', function($scope, menuFactory, corporateFactory, baseURL) {
