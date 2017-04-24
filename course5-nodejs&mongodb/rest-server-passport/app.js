@@ -13,9 +13,9 @@ var config = require('./config');
 mongoose.connect(config.mongoUrl);
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-    // we're connected!
-    console.log("Connected correctly to server");
+db.once('open', function() {
+  // we're connected!
+  console.log("Connected correctly to server");
 });
 
 var routes = require('./routes/index');
@@ -26,6 +26,16 @@ var leaderRouter = require('./routes/leaderRouter');
 
 var app = express();
 
+// Secure traffic only
+app.all('*', function(req, res, next) {
+  console.log('req start: ', req.secure, req.hostname, req.url, app.get('port'));
+  if (req.secure) {
+    return next();
+  }
+  console.log('https://' + req.hostname + ':' + app.get('secPort') + req.url);
+  res.redirect('https://' + req.hostname + ':' + app.get('secPort') + req.url);
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -34,7 +44,9 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 
 // passport config
@@ -48,9 +60,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
-app.use('/dishes',dishRouter);
-app.use('/promotions',promoRouter);
-app.use('/leadership',leaderRouter);
+app.use('/dishes', dishRouter);
+app.use('/promotions', promoRouter);
+app.use('/leadership', leaderRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
