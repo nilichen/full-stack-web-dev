@@ -36,7 +36,7 @@ exports.verifyOrdinaryUser = function (req, res, next) {
 };
 
 exports.verifyAdmin = function(req, res, next) {
-    if (!req.decoded._doc.admin) {
+    if (!req.decoded.admin) {
         var err = new Error('Not an admin!');
         err.status = 403;
         next(err);        
